@@ -1,0 +1,57 @@
+export const ID_OPTIONS = [
+  "Aadhaar",
+  "PAN",
+  "Voter ID",
+  "Driving Licence",
+  "Other",
+];
+export const YES_NO_OPTIONS = ["Yes", "No"];
+
+export const initialForm = {
+  memberDetails: {
+    fullName: "",
+    guardianName: "",
+    dateOfBirth: "",
+    occupation: "",
+    address: "",
+    mobile: "",
+    email: "",
+    identityType: "",
+    identityNumber: "",
+    identityAttached: "",
+  },
+  membershipDetails: {
+    registrationNumber: "",
+    joiningDate: "",
+    shares: "",
+    shareValue: "",
+    monthlySaving: "",
+  },
+  nomineeDetails: { name: "", relationship: "", mobile: "" },
+  declaration: { memberName: "", date: "", agreed: false },
+  witness1: {
+    fullName: "",
+    mobile: "",
+    idType: "",
+    idNumber: "",
+    address: "",
+  },
+  witness2: {
+    fullName: "",
+    mobile: "",
+    idType: "",
+    idNumber: "",
+    address: "",
+  },
+  officeUse: {
+    receivedDate: "",
+    documentsVerified: "",
+    approved: "",
+    registerNumber: "",
+    approvedBy: "",
+    presidentSignature: "",
+    secretarySignature: "",
+  },
+};
+
+export const DRAFT_STORAGE_KEY = "memberRegistrationDraft";
