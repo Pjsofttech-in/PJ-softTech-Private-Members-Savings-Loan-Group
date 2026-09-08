@@ -10,14 +10,6 @@ function Navbar({ activeView, onNavigate }) {
     <>
       <header className="top-navbar">
         <button
-          className="navbar-corner-brand"
-          type="button"
-          onClick={() => onNavigate("dashboard")}
-          aria-label="Go to PJSoftTech dashboard"
-        >
-          <strong>PJSoftTech. Pvt.LMT</strong>
-        </button>
-        <button
           className="navbar-brand"
           type="button"
           onClick={() => onNavigate("dashboard")}
@@ -25,7 +17,7 @@ function Navbar({ activeView, onNavigate }) {
         >
           <img src={logo} alt="PJSoftTech logo" />
           <span>
-            <strong>PJSoftTech</strong>
+            <strong>PJSoftTech. Pvt.Ltd</strong>
             <small>Private Members Savings &amp; Loan Group</small>
           </span>
         </button>

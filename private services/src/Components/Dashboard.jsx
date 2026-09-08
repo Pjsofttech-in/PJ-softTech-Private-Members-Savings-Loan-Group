@@ -1,3 +1,5 @@
+import Footer from "./Footer";
+
 function Dashboard({ onStartRegistration }) {
   const summaryCards = [
     {
@@ -18,7 +20,8 @@ function Dashboard({ onStartRegistration }) {
   ];
 
   return (
-    <main className="dashboard-page mx-auto max-w-[1440px] px-6 py-8 lg:px-10">
+    <>
+      <main className="dashboard-page mx-auto max-w-[1440px] px-6 py-8 lg:px-10">
       <section className="dashboard-hero flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
         <div>
           <p className="eyebrow">Operations overview</p>
@@ -50,7 +53,7 @@ function Dashboard({ onStartRegistration }) {
         <article className="dashboard-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Member information</p>
+              <p className="eyebrow">Member onboarding</p>
               <h2>Add a new member</h2>
             </div>
             <span className="panel-icon">+</span>
@@ -70,7 +73,7 @@ function Dashboard({ onStartRegistration }) {
         <article className="dashboard-panel membership-dashboard-panel">
           <div className="panel-heading">
             <div>
-              <p className="eyebrow">Workspace column</p>
+              <p className="eyebrow">Account overview</p>
               <h2>Membership details</h2>
             </div>
             <span className="panel-icon">₹</span>
@@ -91,7 +94,9 @@ function Dashboard({ onStartRegistration }) {
           </div>
         </article>
       </section>
-    </main>
+      </main>
+      <Footer />
+    </>
   );
 }
 

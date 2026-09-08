@@ -1,13 +1,14 @@
 import { useRef } from "react";
 import { useMemberForm } from "../../hooks/useMemberForm";
+import Footer from "../Footer";
 import { getSectionErrors } from "../../utils/formHelpers";
-import MemberDeclaration from "./MemberDeclaration";
-import MemberDetails from "./MemberDetails";
-import MemberSummary from "./MemberSummary";
-import MembershipDetails from "./MembershipDetails";
-import NomineeDetails from "./NomineeDetails";
-import OfficeUseOnly from "./OfficeUseOnly";
-import WitnessDetails from "./WitnessDetails";
+import {
+  MemberDeclaration,
+  MemberDetails,
+  MembershipDetails,
+  NomineeDetails,
+  WitnessDetails,
+} from "./RegistrationSections";
 
 function RegistrationForm() {
   const {
@@ -47,7 +48,7 @@ function RegistrationForm() {
             </p>
           </div>
           <div className="intro-meta">
-            <strong>01—06</strong>
+            <strong>01—05</strong>
             <span>Registration sections</span>
           </div>
         </div>
@@ -64,80 +65,93 @@ function RegistrationForm() {
             + Add member
           </button>
         </div>
-        <MemberSummary form={form} />
-        {message && (
-          <div className={`notice ${message.type}`} role="status">
-            <span>{message.type === "success" ? "✓" : "!"}</span>
-            {message.text}
-          </div>
-        )}
-        <form
-          ref={formRef}
-          id="member-registration-form"
-          onSubmit={handleSubmit}
-          noValidate
-        >
-          <MemberDetails
-            data={form.memberDetails}
-            errors={getSectionErrors(errors, "memberDetails")}
-            updateField={updateField}
-          />
-          <MembershipDetails
-            data={form.membershipDetails}
-            errors={getSectionErrors(errors, "membershipDetails")}
-            updateField={updateField}
-            totalShareValue={totalShareValue}
-          />
-          <NomineeDetails
-            data={form.nomineeDetails}
-            errors={getSectionErrors(errors, "nomineeDetails")}
-            updateField={updateField}
-          />
-          <MemberDeclaration
-            data={form.declaration}
-            errors={getSectionErrors(errors, "declaration")}
-            updateField={updateField}
-          />
-          <WitnessDetails
-            form={form}
-            errors={{
-              witness1: getSectionErrors(errors, "witness1"),
-              witness2: getSectionErrors(errors, "witness2"),
-            }}
-            updateField={updateField}
-          />
-          <OfficeUseOnly data={form.officeUse} updateField={updateField} />
-          <div className="form-actions">
-            <button
-              type="button"
-              className="button secondary"
-              onClick={saveDraft}
+        <div className="registration-layout">
+          <aside className="registration-progress" aria-label="Registration progress">
+            <div>
+              <p className="eyebrow">Registration flow</p>
+              <h2>Complete each section</h2>
+              <p>Start with personal details and finish with office records.</p>
+            </div>
+            <nav>
+              <a href="#member-details"><span>01</span> Member details</a>
+              <a href="#membership-details"><span>02</span> Membership details</a>
+              <a href="#nominee-details"><span>03</span> Nominee details</a>
+              <a href="#member-declaration"><span>04</span> Declaration</a>
+              <a href="#witness-details"><span>05</span> Witnesses</a>
+            </nav>
+          </aside>
+          <div className="registration-form-column">
+            {message && (
+              <div className={`notice ${message.type}`} role="status">
+                <span>{message.type === "success" ? "✓" : "!"}</span>
+                {message.text}
+              </div>
+            )}
+            <form
+              ref={formRef}
+              id="member-registration-form"
+              onSubmit={handleSubmit}
+              noValidate
             >
-              Save draft
-            </button>
-            <button type="button" className="button ghost" onClick={resetForm}>
-              Reset form
-            </button>
-            <button
-              type="submit"
-              className="button primary"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? (
-                "Preparing..."
-              ) : (
-                <>
-                  Submit registration <span>→</span>
-                </>
-              )}
-            </button>
+              <MemberDetails
+                data={form.memberDetails}
+                errors={getSectionErrors(errors, "memberDetails")}
+                updateField={updateField}
+              />
+              <MembershipDetails
+                data={form.membershipDetails}
+                errors={getSectionErrors(errors, "membershipDetails")}
+                updateField={updateField}
+                totalShareValue={totalShareValue}
+              />
+              <NomineeDetails
+                data={form.nomineeDetails}
+                errors={getSectionErrors(errors, "nomineeDetails")}
+                updateField={updateField}
+              />
+              <MemberDeclaration
+                data={form.declaration}
+                errors={getSectionErrors(errors, "declaration")}
+                updateField={updateField}
+              />
+              <WitnessDetails
+                form={form}
+                errors={{
+                  witness1: getSectionErrors(errors, "witness1"),
+                  witness2: getSectionErrors(errors, "witness2"),
+                }}
+                updateField={updateField}
+              />
+              <div className="form-actions">
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={saveDraft}
+                >
+                  Save draft
+                </button>
+                <button type="button" className="button ghost" onClick={resetForm}>
+                  Reset form
+                </button>
+                <button
+                  type="submit"
+                  className="button primary"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    "Preparing..."
+                  ) : (
+                    <>
+                      Submit registration <span>→</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-        </form>
+        </div>
       </main>
-      <footer>
-        <strong>Private Members Savings &amp; Loan Group</strong>
-        <span>Member Registration System</span>
-      </footer>
+      <Footer />
     </div>
   );
 }
