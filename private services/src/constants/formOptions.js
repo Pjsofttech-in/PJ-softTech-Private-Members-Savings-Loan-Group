@@ -6,6 +6,7 @@ export const ID_OPTIONS = [
   "Other",
 ];
 export const YES_NO_OPTIONS = ["Yes", "No"];
+export const PAYMENT_METHODS = ["Cash", "UPI", "Bank Transfer", "Cheque"];
 
 export const initialForm = {
   memberDetails: {
@@ -19,6 +20,7 @@ export const initialForm = {
     identityType: "",
     identityNumber: "",
     identityAttached: "",
+    identityProof: null,
   },
   membershipDetails: {
     registrationNumber: "",
@@ -52,6 +54,11 @@ export const initialForm = {
     presidentSignature: "",
     secretarySignature: "",
   },
+  paymentDetails: {
+    paymentMethod: "",
+  },
 };
 
 export const DRAFT_STORAGE_KEY = "memberRegistrationDraft";
+export const REGISTRATIONS_STORAGE_KEY = "memberRegistrations";
+export const REGISTRATION_FEE = 500;

@@ -60,14 +60,19 @@ function RadioField({ id, label, value, onChange, options, error, required = fal
   );
 }
 
-function FormSection({ id, number, title, children, className = "" }) {
+function FormSection({ id, number, title, children, className = "", active = true }) {
   return (
-    <section id={id} className={`form-section ${className}`}>
+    <section
+      id={id}
+      className={`form-section ${className}`}
+      hidden={!active}
+      role="tabpanel"
+    >
       <div className="section-heading">
         <span>{number}</span>
         <h2>{title}</h2>
       </div>
-      {children}
+      <div className="section-body">{children}</div>
     </section>
   );
 }

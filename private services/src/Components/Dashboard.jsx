@@ -1,11 +1,14 @@
+import { useState } from "react";
 import Footer from "./Footer";
+import { getMemberRegistrations } from "../services/memberService";
 
 function Dashboard({ onStartRegistration }) {
+  const [memberCount] = useState(() => getMemberRegistrations().length);
   const summaryCards = [
     {
       label: "Total members",
-      value: "—",
-      detail: "Connect your member records",
+      value: memberCount,
+      detail: "Registrations stored on this device",
     },
     {
       label: "Pending applications",

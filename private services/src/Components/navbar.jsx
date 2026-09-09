@@ -27,7 +27,6 @@ function Navbar({ activeView, onNavigate }) {
         </div>
       </header>
       <aside className="sidebar" aria-label="Primary navigation">
-        <p className="sidebar-label">Workspace</p>
         <div className="nav-links">
           {navItems.map((item) => (
             <button

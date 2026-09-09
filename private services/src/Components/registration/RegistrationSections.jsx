@@ -4,10 +4,31 @@ import {
   RadioField,
   SelectField,
 } from "./RegistrationFields";
-import { ID_OPTIONS, YES_NO_OPTIONS } from "../../constants/formOptions";
+import { ID_OPTIONS, PAYMENT_METHODS, YES_NO_OPTIONS, REGISTRATION_FEE } from "../../constants/formOptions";
 import { formatIndianCurrency } from "../../utils/formHelpers";
 
-function MemberDetails({ data, errors, updateField }) {
+function MemberDetails({ data, errors, updateField, active }) {
+  const handleProofUpload = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      updateField("memberDetails", "identityProof", null);
+      return;
+    }
+    if (file.type !== "application/pdf") {
+      updateField("memberDetails", "identityProof", null);
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () =>
+      updateField("memberDetails", "identityProof", {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        dataUrl: reader.result,
+      });
+    reader.readAsDataURL(file);
+  };
+
   const field = (name, label, props = {}) => (
     <FormField
       id={`member-${name}`}
@@ -20,7 +41,7 @@ function MemberDetails({ data, errors, updateField }) {
   );
 
   return (
-    <FormSection id="member-details" number="01" title="Member details">
+    <FormSection id="member-details" number="01" title="Member details" active={active}>
       <div className="field-grid member-details-grid">
         {field("fullName", "Full Name", { required: true })}
         {field("guardianName", "Father's / Spouse's Name", { required: true })}
@@ -76,12 +97,33 @@ function MemberDetails({ data, errors, updateField }) {
           error={errors.identityAttached}
           required
         />
+        <FormField
+          id="member-identity-proof"
+          label="Upload ID Proof PDF"
+          value={data.identityProof?.name || ""}
+          onChange={() => {}}
+          error={errors.identityProof}
+          className="span-two proof-upload-field"
+          required
+        >
+          <input
+            id="member-identity-proof"
+            name="member-identity-proof"
+            type="file"
+            accept="application/pdf,.pdf"
+            onChange={handleProofUpload}
+            required={!data.identityProof}
+            aria-invalid={Boolean(errors.identityProof)}
+            aria-describedby={errors.identityProof ? "member-identity-proof-error" : undefined}
+          />
+          <small>PDF only. {data.identityProof ? `Attached: ${data.identityProof.name}` : "Attach the member identity proof copy."}</small>
+        </FormField>
       </div>
     </FormSection>
   );
 }
 
-function MembershipDetails({ data, errors, updateField, totalShareValue }) {
+function MembershipDetails({ data, errors, updateField, totalShareValue, active }) {
   const field = (name, label, props = {}) => (
     <FormField
       id={`membership-${name}`}
@@ -94,7 +136,7 @@ function MembershipDetails({ data, errors, updateField, totalShareValue }) {
   );
 
   return (
-    <FormSection id="membership-details" number="02" title="Membership details">
+    <FormSection id="membership-details" number="02" title="Membership details" active={active}>
       <div className="field-grid">
         {field("registrationNumber", "Member Registration No.", { required: true })}
         {field("joiningDate", "Date of Joining", { type: "date", required: true })}
@@ -132,7 +174,7 @@ function MembershipDetails({ data, errors, updateField, totalShareValue }) {
   );
 }
 
-function NomineeDetails({ data, errors, updateField }) {
+function NomineeDetails({ data, errors, updateField, active }) {
   const field = (name, label, props = {}) => (
     <FormField
       id={`nominee-${name}`}
@@ -145,7 +187,7 @@ function NomineeDetails({ data, errors, updateField }) {
   );
 
   return (
-    <FormSection id="nominee-details" number="03" title="Nominee details">
+    <FormSection id="nominee-details" number="03" title="Nominee details" active={active}>
       <div className="field-grid">
         {field("name", "Nominee Name", { required: true })}
         {field("relationship", "Relationship with Member", { required: true })}
@@ -159,9 +201,9 @@ function NomineeDetails({ data, errors, updateField }) {
   );
 }
 
-function MemberDeclaration({ data, errors, updateField }) {
+function MemberDeclaration({ data, errors, updateField, active }) {
   return (
-    <FormSection id="member-declaration" number="04" title="Member declaration">
+    <FormSection id="member-declaration" number="04" title="Member declaration" active={active}>
       <div className="declaration-copy">
         I hereby declare that the information provided above is true and
         correct. I agree to follow all rules and regulations of the Private
@@ -288,12 +330,41 @@ function WitnessCard({ number, data, errors, updateField }) {
   );
 }
 
-function WitnessDetails({ form, errors, updateField }) {
+function WitnessDetails({ form, errors, updateField, active }) {
   return (
-    <FormSection id="witness-details" number="05" title="Witness details">
+    <FormSection id="witness-details" number="05" title="Witness details" active={active}>
       <div className="witness-grid">
         <WitnessCard number={1} data={form.witness1} errors={errors.witness1} updateField={updateField} />
         <WitnessCard number={2} data={form.witness2} errors={errors.witness2} updateField={updateField} />
+      </div>
+    </FormSection>
+  );
+}
+
+function PaymentDetails({ data, errors, updateField, active }) {
+  return (
+    <FormSection id="payment-details" number="06" title="Registration payment" active={active}>
+      <div className="payment-panel">
+        <div>
+          <span className="payment-panel-label">One-time registration fee</span>
+          <strong>{formatIndianCurrency(REGISTRATION_FEE)}</strong>
+          <small>Record the payment method used for this new member.</small>
+        </div>
+        <label className="payment-panel-field" htmlFor="registration-payment-method">
+          Payment method <span className="required">*</span>
+          <select
+            id="registration-payment-method"
+            value={data.paymentMethod}
+            onChange={(event) => updateField("paymentDetails", "paymentMethod", event.target.value)}
+            aria-invalid={Boolean(errors.paymentMethod)}
+            aria-describedby={errors.paymentMethod ? "registration-payment-method-error" : undefined}
+            required
+          >
+            <option value="">Select payment method</option>
+            {PAYMENT_METHODS.map((method) => <option key={method} value={method}>{method}</option>)}
+          </select>
+          {errors.paymentMethod && <small className="payment-method-error" id="registration-payment-method-error">{errors.paymentMethod}</small>}
+        </label>
       </div>
     </FormSection>
   );
@@ -305,4 +376,5 @@ export {
   NomineeDetails,
   MemberDeclaration,
   WitnessDetails,
+  PaymentDetails,
 };

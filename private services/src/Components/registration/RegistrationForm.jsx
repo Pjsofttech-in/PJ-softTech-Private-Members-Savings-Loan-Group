@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useMemberForm } from "../../hooks/useMemberForm";
 import Footer from "../Footer";
 import { getSectionErrors } from "../../utils/formHelpers";
@@ -8,6 +8,7 @@ import {
   MembershipDetails,
   NomineeDetails,
   WitnessDetails,
+  PaymentDetails,
 } from "./RegistrationSections";
 
 function RegistrationForm() {
@@ -22,6 +23,15 @@ function RegistrationForm() {
     message,
     totalShareValue,
   } = useMemberForm();
+  const [activeSection, setActiveSection] = useState(0);
+  const sections = [
+    { id: "member-details", label: "Member details" },
+    { id: "membership-details", label: "Membership" },
+    { id: "nominee-details", label: "Nominee" },
+    { id: "member-declaration", label: "Declaration" },
+    { id: "witness-details", label: "Witnesses" },
+    { id: "payment-details", label: "Payment" },
+  ];
   const formRef = useRef(null);
   const scrollToForm = () =>
     formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -38,20 +48,6 @@ function RegistrationForm() {
         </div>
       </header>
       <main className="page-content">
-        <div className="intro">
-          <div>
-            <p className="eyebrow">New member application</p>
-            <h2>Create a member file</h2>
-            <p>
-              Complete the details below. Your information will be reviewed by
-              the group office.
-            </p>
-          </div>
-          <div className="intro-meta">
-            <strong>01—05</strong>
-            <span>Registration sections</span>
-          </div>
-        </div>
         <div className="member-file-toolbar">
           <div>
             <strong>Add a new member</strong>
@@ -65,21 +61,22 @@ function RegistrationForm() {
             + Add member
           </button>
         </div>
+        <nav className="registration-steps" aria-label="Registration sections" role="tablist">
+          {sections.map((section, index) => (
+            <button
+              type="button"
+              key={section.id}
+              className={activeSection === index ? "active" : ""}
+              role="tab"
+              aria-selected={activeSection === index}
+              aria-current={activeSection === index ? "step" : undefined}
+              onClick={() => setActiveSection(index)}
+            >
+              <span>{index + 1}</span> {section.label}
+            </button>
+          ))}
+        </nav>
         <div className="registration-layout">
-          <aside className="registration-progress" aria-label="Registration progress">
-            <div>
-              <p className="eyebrow">Registration flow</p>
-              <h2>Complete each section</h2>
-              <p>Start with personal details and finish with office records.</p>
-            </div>
-            <nav>
-              <a href="#member-details"><span>01</span> Member details</a>
-              <a href="#membership-details"><span>02</span> Membership details</a>
-              <a href="#nominee-details"><span>03</span> Nominee details</a>
-              <a href="#member-declaration"><span>04</span> Declaration</a>
-              <a href="#witness-details"><span>05</span> Witnesses</a>
-            </nav>
-          </aside>
           <div className="registration-form-column">
             {message && (
               <div className={`notice ${message.type}`} role="status">
@@ -97,22 +94,26 @@ function RegistrationForm() {
                 data={form.memberDetails}
                 errors={getSectionErrors(errors, "memberDetails")}
                 updateField={updateField}
+                active={activeSection === 0}
               />
               <MembershipDetails
                 data={form.membershipDetails}
                 errors={getSectionErrors(errors, "membershipDetails")}
                 updateField={updateField}
                 totalShareValue={totalShareValue}
+                active={activeSection === 1}
               />
               <NomineeDetails
                 data={form.nomineeDetails}
                 errors={getSectionErrors(errors, "nomineeDetails")}
                 updateField={updateField}
+                active={activeSection === 2}
               />
               <MemberDeclaration
                 data={form.declaration}
                 errors={getSectionErrors(errors, "declaration")}
                 updateField={updateField}
+                active={activeSection === 3}
               />
               <WitnessDetails
                 form={form}
@@ -121,7 +122,32 @@ function RegistrationForm() {
                   witness2: getSectionErrors(errors, "witness2"),
                 }}
                 updateField={updateField}
+                active={activeSection === 4}
               />
+              <PaymentDetails
+                data={form.paymentDetails}
+                errors={getSectionErrors(errors, "paymentDetails")}
+                updateField={updateField}
+                active={activeSection === 5}
+              />
+              <div className="tab-actions">
+                <button
+                  type="button"
+                  className="button ghost"
+                  onClick={() => setActiveSection((current) => Math.max(0, current - 1))}
+                  disabled={activeSection === 0}
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => setActiveSection((current) => Math.min(sections.length - 1, current + 1))}
+                  disabled={activeSection === sections.length - 1}
+                >
+                  Next
+                </button>
+              </div>
               <div className="form-actions">
                 <button
                   type="button"
@@ -131,7 +157,7 @@ function RegistrationForm() {
                   Save draft
                 </button>
                 <button type="button" className="button ghost" onClick={resetForm}>
-                  Reset form
+                  Reset
                 </button>
                 <button
                   type="submit"

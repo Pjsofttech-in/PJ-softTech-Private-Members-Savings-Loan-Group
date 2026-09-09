@@ -28,6 +28,10 @@ export function validateMemberForm(form) {
     ["identityNumber", "ID proof number"],
     ["identityAttached", "Document attachment status"],
   ]);
+  if (!form.memberDetails.identityProof)
+    errors["memberDetails.identityProof"] = "PDF proof copy is required.";
+  else if (form.memberDetails.identityProof.type !== "application/pdf")
+    errors["memberDetails.identityProof"] = "Proof copy must be a PDF file.";
   required("membershipDetails", [
     ["registrationNumber", "Registration number"],
     ["joiningDate", "Date of joining"],
@@ -44,6 +48,7 @@ export function validateMemberForm(form) {
     ["memberName", "Member name"],
     ["date", "Declaration date"],
   ]);
+  required("paymentDetails", [["paymentMethod", "Payment method"]]);
   if (!form.declaration.agreed)
     errors["declaration.agreed"] =
       "You must agree to the declaration before submitting.";

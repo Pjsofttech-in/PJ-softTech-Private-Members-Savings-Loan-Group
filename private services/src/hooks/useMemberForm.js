@@ -1,5 +1,10 @@
 import { useMemo, useState } from "react";
-import { DRAFT_STORAGE_KEY, initialForm } from "../constants/formOptions";
+import { useForm, useWatch } from "react-hook-form";
+import {
+  DRAFT_STORAGE_KEY,
+  initialForm,
+  REGISTRATION_FEE,
+} from "../constants/formOptions";
 import { submitMemberRegistration } from "../services/memberService";
 import { getTotalShareValue } from "../utils/formHelpers";
 import { validateMemberForm } from "../utils/validation";
@@ -26,11 +31,13 @@ function readStoredDraft() {
 
 export function useMemberForm() {
   const [storedDraft] = useState(readStoredDraft);
-  const [form, setForm] = useState(() => storedDraft || initialForm);
+  const formMethods = useForm({
+    defaultValues: storedDraft || initialForm,
+    mode: "onBlur",
+  });
+  const form = useWatch({ control: formMethods.control });
   const [errors, setErrors] = useState({});
-  const [message, setMessage] = useState(() =>
-    storedDraft ? { type: "success", text: "Saved draft restored." } : null,
-  );
+  const [message, setMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const totalShareValue = useMemo(
     () => getTotalShareValue(form.membershipDetails),
@@ -38,10 +45,10 @@ export function useMemberForm() {
   );
 
   const updateField = (section, field, value) => {
-    setForm((current) => ({
-      ...current,
-      [section]: { ...current[section], [field]: value },
-    }));
+    formMethods.setValue(`${section}.${field}`, value, {
+      shouldDirty: true,
+      shouldValidate: false,
+    });
     setErrors((current) => {
       const next = { ...current };
       delete next[`${section}.${field}`];
@@ -58,7 +65,7 @@ export function useMemberForm() {
   const loadDraft = () => {
     const restoredForm = readStoredDraft();
     if (restoredForm) {
-      setForm(restoredForm);
+      formMethods.reset(restoredForm);
       setMessage({ type: "success", text: "Saved draft restored." });
       return true;
     }
@@ -67,8 +74,12 @@ export function useMemberForm() {
 
   const saveDraft = () => {
     try {
-      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(form));
+      localStorage.setItem(
+        DRAFT_STORAGE_KEY,
+        JSON.stringify(formMethods.getValues()),
+      );
       setMessage({ type: "success", text: "Draft saved successfully." });
+      window.setTimeout(() => setMessage(null), 3000);
     } catch {
       setMessage({
         type: "error",
@@ -83,7 +94,7 @@ export function useMemberForm() {
       !window.confirm("Reset all entered registration data?")
     )
       return;
-    setForm(initialForm);
+    formMethods.reset(initialForm);
     setErrors({});
     setMessage(null);
   };
@@ -101,11 +112,22 @@ export function useMemberForm() {
     }
     setIsSubmitting(true);
     try {
-      const registrationData = { ...form, totalShareValue };
+      const registrationData = {
+        ...formMethods.getValues(),
+        totalShareValue,
+        registrationFee: REGISTRATION_FEE,
+      };
       submitMemberRegistration(registrationData);
+      formMethods.reset(initialForm);
+      setErrors({});
       setMessage({
         type: "success",
-        text: "Registration details are ready for processing.",
+        text: "Registration saved successfully. The form is ready for the next member.",
+      });
+    } catch {
+      setMessage({
+        type: "error",
+        text: "Registration could not be stored on this device.",
       });
     } finally {
       setIsSubmitting(false);
