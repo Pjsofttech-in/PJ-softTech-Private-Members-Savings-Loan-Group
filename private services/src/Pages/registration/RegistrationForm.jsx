@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { useMemberForm } from "../../hooks/useMemberForm";
-import Footer from "../Footer";
+import Footer from "../../Components/Footer";
 import { getSectionErrors } from "../../utils/formHelpers";
 import {
   MemberDeclaration,

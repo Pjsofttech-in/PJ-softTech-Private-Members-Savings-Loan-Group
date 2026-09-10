@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Footer from "../Footer";
+import Footer from "../../Components/Footer";
 import { formatIndianCurrency } from "../../utils/formHelpers";
 import { saveSharesApplication } from "../../services/sharesApplicationService";
 import { ApplicantDetails, ShareDetails, ShareDeclaration } from "./SharesApplicationSections";

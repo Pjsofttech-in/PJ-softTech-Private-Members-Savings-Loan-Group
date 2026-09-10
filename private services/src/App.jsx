@@ -3,8 +3,8 @@ import "./App.css";
 import "./banking.css";
 import Navbar from "./Components/navbar";
 import Dashboard from "./Components/Dashboard";
-import RegistrationForm from "./Components/registration/RegistrationForm";
-import SharesApplicationForm from "./Components/shares/SharesApplicationForm";
+import RegistrationForm from "./Pages/registration/RegistrationForm";
+import SharesApplicationForm from "./Pages/shares/SharesApplicationForm";
 
 function App() {
   const [activeView, setActiveView] = useState("dashboard");
