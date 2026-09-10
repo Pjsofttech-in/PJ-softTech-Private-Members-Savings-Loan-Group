@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Footer from "./Footer";
 import { getMemberRegistrations } from "../services/memberService";
+import { getSharesApplications } from "../services/sharesApplicationService";
 
-function Dashboard({ onStartRegistration }) {
+function Dashboard({ onStartRegistration, onStartSharesApplication }) {
   const [memberCount] = useState(() => getMemberRegistrations().length);
+  const [shareApplications] = useState(() => getSharesApplications());
   const summaryCards = [
     {
       label: "Total members",
@@ -95,6 +97,40 @@ function Dashboard({ onStartRegistration }) {
               <strong>Included on the same page</strong>
             </div>
           </div>
+        </article>
+        <article className="dashboard-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Share management</p>
+              <h2>Apply for shares</h2>
+            </div>
+            <span className="panel-icon">+</span>
+          </div>
+          <p>Submit a separate share application for an existing member and record the requested allocation.</p>
+          <button className="text-button" type="button" onClick={onStartSharesApplication}>
+            Open application <span>→</span>
+          </button>
+        </article>
+        <article className="dashboard-panel shares-dashboard-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow">Submitted records</p>
+              <h2>Shares applications</h2>
+            </div>
+            <span className="panel-icon">{shareApplications.length}</span>
+          </div>
+          {shareApplications.length ? (
+            <div className="dashboard-detail-list">
+              {shareApplications.slice(-3).reverse().map((application) => (
+                <div key={application.id}>
+                  <span>{application.applicant.fullName} · {application.applicant.registrationNumber}</span>
+                  <strong>{application.applicant.address}</strong>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No shares applications submitted yet.</p>
+          )}
         </article>
       </section>
       </main>

@@ -4,6 +4,7 @@ import "./banking.css";
 import Navbar from "./Components/navbar";
 import Dashboard from "./Components/Dashboard";
 import RegistrationForm from "./Components/registration/RegistrationForm";
+import SharesApplicationForm from "./Components/shares/SharesApplicationForm";
 
 function App() {
   const [activeView, setActiveView] = useState("dashboard");
@@ -12,13 +13,14 @@ function App() {
     <div className="app-shell min-h-screen bg-[#eef2ef]">
       <Navbar activeView={activeView} onNavigate={setActiveView} />
       <div className="app-content min-h-[calc(100vh-72px)]">
-        {activeView === "dashboard" ? (
+        {activeView === "dashboard" && (
           <Dashboard
             onStartRegistration={() => setActiveView("registration")}
+            onStartSharesApplication={() => setActiveView("shares")}
           />
-        ) : (
-          <RegistrationForm />
         )}
+        {activeView === "registration" && <RegistrationForm />}
+        {activeView === "shares" && <SharesApplicationForm />}
       </div>
     </div>
   );

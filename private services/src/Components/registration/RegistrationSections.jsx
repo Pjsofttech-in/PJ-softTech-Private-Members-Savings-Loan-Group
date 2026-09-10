@@ -7,46 +7,83 @@ import {
 import { ID_OPTIONS, PAYMENT_METHODS, YES_NO_OPTIONS, REGISTRATION_FEE } from "../../constants/formOptions";
 import { formatIndianCurrency } from "../../utils/formHelpers";
 
+function readPdfUpload(event, onUpload) {
+  const file = event.target.files?.[0];
+  if (!file || file.type !== "application/pdf") {
+    onUpload(null);
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = () =>
+    onUpload({
+      name: file.name,
+      type: file.type,
+      size: file.size,
+      dataUrl: reader.result,
+    });
+  reader.readAsDataURL(file);
+}
+
+function PdfUploadField({ id, label, value, error, onUpload, description }) {
+  return (
+    <FormField
+      id={id}
+      label={label}
+      value={value?.name || ""}
+      onChange={() => {}}
+      error={error}
+      className="span-two proof-upload-field"
+      required
+    >
+      <input
+        id={id}
+        name={id}
+        type="file"
+        accept="application/pdf,.pdf"
+        onChange={(event) => readPdfUpload(event, onUpload)}
+        required={!value}
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${id}-error` : undefined}
+      />
+      <small>PDF only. {value ? `Attached: ${value.name}` : description}</small>
+    </FormField>
+  );
+}
+
 function MemberDetails({ data, errors, updateField, active }) {
   const handleProofUpload = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      updateField("memberDetails", "identityProof", null);
-      return;
-    }
-    if (file.type !== "application/pdf") {
-      updateField("memberDetails", "identityProof", null);
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () =>
-      updateField("memberDetails", "identityProof", {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        dataUrl: reader.result,
-      });
-    reader.readAsDataURL(file);
+    readPdfUpload(event, (file) => updateField("memberDetails", "identityProof", file));
   };
 
-  const field = (name, label, props = {}) => (
-    <FormField
-      id={`member-${name}`}
-      label={label}
-      value={data[name]}
-      onChange={(value) => updateField("memberDetails", name, value)}
-      error={errors[name]}
-      {...props}
-    />
-  );
+  const fields = [
+    ["fullName", "Full Name", { required: true }],
+    ["guardianName", "Father's / Spouse's Name", { required: true }],
+    ["dateOfBirth", "Date of Birth", { type: "date", required: true }],
+    ["occupation", "Occupation", { required: true }],
+    ["mobile", "Mobile Number", {
+      type: "tel",
+      inputMode: "numeric",
+      placeholder: "10-digit mobile number",
+      required: true,
+    }],
+    ["email", "Email ID", { type: "email", placeholder: "name@example.com" }],
+    ["identityNumber", "ID Proof Number", { required: true }],
+  ];
 
   return (
     <FormSection id="member-details" number="01" title="Member details" active={active}>
       <div className="field-grid member-details-grid">
-        {field("fullName", "Full Name", { required: true })}
-        {field("guardianName", "Father's / Spouse's Name", { required: true })}
-        {field("dateOfBirth", "Date of Birth", { type: "date", required: true })}
-        {field("occupation", "Occupation", { required: true })}
+        {fields.map(([name, label, props]) => (
+          <FormField
+            key={name}
+            id={`member-${name}`}
+            label={label}
+            value={data[name]}
+            onChange={(value) => updateField("memberDetails", name, value)}
+            error={errors[name]}
+            {...props}
+          />
+        ))}
         <FormField
           id="member-address"
           label="Residential Address"
@@ -60,24 +97,20 @@ function MemberDetails({ data, errors, updateField, active }) {
             id="member-address"
             name="member-address"
             value={data.address}
-            onChange={(event) =>
-              updateField("memberDetails", "address", event.target.value)
-            }
+            onChange={(event) => updateField("memberDetails", "address", event.target.value)}
             required
             aria-invalid={Boolean(errors.address)}
             aria-describedby={errors.address ? "member-address-error" : undefined}
           />
         </FormField>
-        {field("mobile", "Mobile Number", {
-          type: "tel",
-          inputMode: "numeric",
-          placeholder: "10-digit mobile number",
-          required: true,
-        })}
-        {field("email", "Email ID", {
-          type: "email",
-          placeholder: "name@example.com",
-        })}
+        <PdfUploadField
+          id="member-address-proof"
+          label="Upload Address Proof PDF"
+          value={data.addressProof}
+          error={errors.addressProof}
+          onUpload={(file) => updateField("memberDetails", "addressProof", file)}
+          description="Attach the member residential address proof copy."
+        />
         <SelectField
           id="identity-type"
           label="ID Proof Type"
@@ -87,7 +120,6 @@ function MemberDetails({ data, errors, updateField, active }) {
           options={ID_OPTIONS}
           required
         />
-        {field("identityNumber", "ID Proof Number", { required: true })}
         <RadioField
           id="identity-attached"
           label="ID Proof Copy Attached"
@@ -124,44 +156,42 @@ function MemberDetails({ data, errors, updateField, active }) {
 }
 
 function MembershipDetails({ data, errors, updateField, totalShareValue, active }) {
-  const field = (name, label, props = {}) => (
-    <FormField
-      id={`membership-${name}`}
-      label={label}
-      value={data[name]}
-      onChange={(value) => updateField("membershipDetails", name, value)}
-      error={errors[name]}
-      {...props}
-    />
-  );
+  const fields = [
+    ["registrationNumber", "Member Registration No.", { required: true }],
+    ["joiningDate", "Date of Joining", { type: "date", required: true }],
+    ["shares", "Number of Shares", { type: "number", min: "1", step: "1", required: true }],
+    ["shareValue", "Share Value", {
+      type: "number",
+      min: "0.01",
+      step: "0.01",
+      inputMode: "decimal",
+      className: "currency-field",
+      required: true,
+    }],
+    ["monthlySaving", "Monthly Saving Amount", {
+      type: "number",
+      min: "0.01",
+      step: "0.01",
+      inputMode: "decimal",
+      className: "currency-field",
+      required: true,
+    }],
+  ];
 
   return (
     <FormSection id="membership-details" number="02" title="Membership details" active={active}>
       <div className="field-grid">
-        {field("registrationNumber", "Member Registration No.", { required: true })}
-        {field("joiningDate", "Date of Joining", { type: "date", required: true })}
-        {field("shares", "Number of Shares", {
-          type: "number",
-          min: "1",
-          step: "1",
-          required: true,
-        })}
-        {field("shareValue", "Share Value", {
-          type: "number",
-          min: "0.01",
-          step: "0.01",
-          inputMode: "decimal",
-          className: "currency-field",
-          required: true,
-        })}
-        {field("monthlySaving", "Monthly Saving Amount", {
-          type: "number",
-          min: "0.01",
-          step: "0.01",
-          inputMode: "decimal",
-          className: "currency-field",
-          required: true,
-        })}
+        {fields.map(([name, label, props]) => (
+          <FormField
+            key={name}
+            id={`membership-${name}`}
+            label={label}
+            value={data[name]}
+            onChange={(value) => updateField("membershipDetails", name, value)}
+            error={errors[name]}
+            {...props}
+          />
+        ))}
       </div>
       <div className="calculation">
         <span>Total share value</span>
@@ -175,27 +205,30 @@ function MembershipDetails({ data, errors, updateField, totalShareValue, active 
 }
 
 function NomineeDetails({ data, errors, updateField, active }) {
-  const field = (name, label, props = {}) => (
-    <FormField
-      id={`nominee-${name}`}
-      label={label}
-      value={data[name]}
-      onChange={(value) => updateField("nomineeDetails", name, value)}
-      error={errors[name]}
-      {...props}
-    />
-  );
+  const fields = [
+    ["name", "Nominee Name", { required: true }],
+    ["relationship", "Relationship with Member", { required: true }],
+    ["mobile", "Nominee Mobile Number", {
+      type: "tel",
+      inputMode: "numeric",
+      required: true,
+    }],
+  ];
 
   return (
     <FormSection id="nominee-details" number="03" title="Nominee details" active={active}>
       <div className="field-grid">
-        {field("name", "Nominee Name", { required: true })}
-        {field("relationship", "Relationship with Member", { required: true })}
-        {field("mobile", "Nominee Mobile Number", {
-          type: "tel",
-          inputMode: "numeric",
-          required: true,
-        })}
+        {fields.map(([name, label, props]) => (
+          <FormField
+            key={name}
+            id={`nominee-${name}`}
+            label={label}
+            value={data[name]}
+            onChange={(value) => updateField("nomineeDetails", name, value)}
+            error={errors[name]}
+            {...props}
+          />
+        ))}
       </div>
     </FormSection>
   );
@@ -268,31 +301,12 @@ function WitnessCard({ number, data, errors, updateField }) {
   const renderField = ({ name, label, type = "text", options, ...props }) => {
     const id = `${prefix}-${name}`;
     const onChange = (value) => updateField(prefix, name, value);
-    if (type === "select") {
+    const baseProps = { key: name, id, label, value: data[name], onChange, error: errors[name], ...props };
+
+    if (type === "select") return <SelectField {...baseProps} options={options} />;
+    if (type === "textarea")
       return (
-        <SelectField
-          key={name}
-          id={id}
-          label={label}
-          value={data[name]}
-          onChange={onChange}
-          error={errors[name]}
-          options={options}
-          {...props}
-        />
-      );
-    }
-    if (type === "textarea") {
-      return (
-        <FormField
-          key={name}
-          id={id}
-          label={label}
-          value={data[name]}
-          onChange={onChange}
-          error={errors[name]}
-          {...props}
-        >
+        <FormField {...baseProps}>
           <textarea
             id={id}
             name={id}
@@ -304,19 +318,8 @@ function WitnessCard({ number, data, errors, updateField }) {
           />
         </FormField>
       );
-    }
-    return (
-      <FormField
-        key={name}
-        id={id}
-        label={label}
-        value={data[name]}
-        onChange={onChange}
-        error={errors[name]}
-        type={type}
-        {...props}
-      />
-    );
+
+    return <FormField {...baseProps} type={type} />;
   };
 
   return (
@@ -325,7 +328,17 @@ function WitnessCard({ number, data, errors, updateField }) {
         <span>0{number}</span>
         <h3>Witness {number}</h3>
       </div>
-      <div className="field-grid">{fields.map(renderField)}</div>
+      <div className="field-grid">
+        {fields.map(renderField)}
+        <PdfUploadField
+          id={`${prefix}-address-proof`}
+          label="Upload Address Proof PDF"
+          value={data.addressProof}
+          error={errors.addressProof}
+          onUpload={(file) => updateField(prefix, "addressProof", file)}
+          description="Attach the witness residential address proof copy."
+        />
+      </div>
     </div>
   );
 }
@@ -365,6 +378,9 @@ function PaymentDetails({ data, errors, updateField, active }) {
           </select>
           {errors.paymentMethod && <small className="payment-method-error" id="registration-payment-method-error">{errors.paymentMethod}</small>}
         </label>
+        <button type="submit" className="button primary payment-button">
+          Complete payment <span>→</span>
+        </button>
       </div>
     </FormSection>
   );

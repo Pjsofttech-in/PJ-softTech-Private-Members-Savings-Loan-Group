@@ -32,6 +32,10 @@ export function validateMemberForm(form) {
     errors["memberDetails.identityProof"] = "PDF proof copy is required.";
   else if (form.memberDetails.identityProof.type !== "application/pdf")
     errors["memberDetails.identityProof"] = "Proof copy must be a PDF file.";
+  if (!form.memberDetails.addressProof)
+    errors["memberDetails.addressProof"] = "Address proof PDF is required.";
+  else if (form.memberDetails.addressProof.type !== "application/pdf")
+    errors["memberDetails.addressProof"] = "Address proof must be a PDF file.";
   required("membershipDetails", [
     ["registrationNumber", "Registration number"],
     ["joiningDate", "Date of joining"],
@@ -76,6 +80,10 @@ export function validateMemberForm(form) {
       ["idNumber", "ID proof number"],
       ["address", "Address"],
     ]);
+    if (!form[section].addressProof)
+      errors[`${section}.addressProof`] = "Address proof PDF is required.";
+    else if (form[section].addressProof.type !== "application/pdf")
+      errors[`${section}.addressProof`] = "Address proof must be a PDF file.";
     validateMobile(section, "mobile");
   });
 

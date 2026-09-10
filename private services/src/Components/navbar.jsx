@@ -4,6 +4,7 @@ function Navbar({ activeView, onNavigate }) {
   const navItems = [
     { id: "dashboard", label: "Dashboard" },
     { id: "registration", label: "Member registration" },
+    { id: "shares", label: "Shares application" },
   ];
 
   return (

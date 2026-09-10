@@ -21,6 +21,7 @@ export const initialForm = {
     identityNumber: "",
     identityAttached: "",
     identityProof: null,
+    addressProof: null,
   },
   membershipDetails: {
     registrationNumber: "",
@@ -37,6 +38,7 @@ export const initialForm = {
     idType: "",
     idNumber: "",
     address: "",
+    addressProof: null,
   },
   witness2: {
     fullName: "",
@@ -44,6 +46,7 @@ export const initialForm = {
     idType: "",
     idNumber: "",
     address: "",
+    addressProof: null,
   },
   officeUse: {
     receivedDate: "",
