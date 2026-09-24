@@ -3,9 +3,7 @@ import { useForm, useWatch } from "react-hook-form";
 import {
   DRAFT_STORAGE_KEY,
   initialForm,
-  REGISTRATION_FEE,
 } from "../constants/formOptions";
-import { submitMemberRegistration } from "../services/memberService";
 import { getTotalShareValue } from "../utils/formHelpers";
 import { validateMemberForm } from "../utils/validation";
 
@@ -99,6 +97,7 @@ export function useMemberForm() {
     setMessage(null);
   };
 
+  // --- UPDATED ROBUST SUBMIT LOGIC ---
   const handleSubmit = async (event) => {
     event.preventDefault();
     const validationErrors = validateForm();
@@ -110,29 +109,61 @@ export function useMemberForm() {
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
+    
     setIsSubmitting(true);
+    
     try {
-      const registrationData = {
-        ...formMethods.getValues(),
-        totalShareValue,
-        registrationFee: REGISTRATION_FEE,
+      const rawData = formMethods.getValues();
+      console.log("Captured Form Raw Data:", rawData); // Check your browser console (F12) to see this!
+
+      // Robust extraction checking multiple possible nested structures
+      const d = rawData.memberDetails || rawData.personalDetails || rawData;
+
+      const databasePayload = {
+        name: d.fullName || d.name || d.firstName || "",
+        email: d.emailId || d.email || d.emailAddress || "",
+        phone: d.mobileNumber || d.phone || d.mobile || "",
+        
+        fathersName: d.fathersName || d.fatherName || "",
+        dob: d.dob || d.dateOfBirth || "",
+        occupation: d.occupation || "",
+        idProofType: d.idProofType || "",
+        idProofNumber: d.idProofNumber || "",
+        residentialAddress: d.residentialAddress || d.address || ""
       };
-      submitMemberRegistration(registrationData);
-      formMethods.reset(initialForm);
-      setErrors({});
-      setMessage({
-        type: "success",
-        text: "Registration saved successfully. The form is ready for the next member.",
+
+      // Send it to your Spring Boot API
+      const response = await fetch('http://localhost:8080/api/members', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(databasePayload)
       });
-    } catch {
+
+      if (response.ok) {
+        formMethods.reset(initialForm);
+        setErrors({});
+        localStorage.removeItem(DRAFT_STORAGE_KEY);
+        setMessage({
+          type: "success",
+          text: "Registration saved successfully to MySQL database!",
+        });
+      } else {
+        throw new Error("Server rejected the save");
+      }
+      
+    } catch (error) {
+      console.error("Database connection error:", error);
       setMessage({
         type: "error",
-        text: "Registration could not be stored on this device.",
+        text: "Could not connect to the database. Registration failed.",
       });
     } finally {
       setIsSubmitting(false);
     }
   };
+  // -----------------------------
 
   return {
     form,

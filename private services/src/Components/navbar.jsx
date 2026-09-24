@@ -1,10 +1,14 @@
+// src/Components/navbar.jsx
 import logo from "../assets/Pj Soft.png";
 
 function Navbar({ activeView, onNavigate }) {
+  // Added "settings" to the navItems array
   const navItems = [
     { id: "dashboard", label: "Dashboard" },
     { id: "registration", label: "Member registration" },
     { id: "shares", label: "Shares application" },
+    { id: "list", label: "Transaction & User List" }, 
+   
   ];
 
   return (

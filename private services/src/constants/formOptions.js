@@ -7,6 +7,7 @@ export const ID_OPTIONS = [
 ];
 export const YES_NO_OPTIONS = ["Yes", "No"];
 export const PAYMENT_METHODS = ["Cash", "UPI", "Bank Transfer", "Cheque"];
+export const MEMBER_STATUS_OPTIONS = ["Active", "Paused", "Terminated", "Suspended"]; 
 
 export const initialForm = {
   memberDetails: {
@@ -26,6 +27,7 @@ export const initialForm = {
   membershipDetails: {
     registrationNumber: "",
     joiningDate: "",
+    status: "Active", // <-- Added the default status here
     shares: "",
     shareValue: "",
     monthlySaving: "",

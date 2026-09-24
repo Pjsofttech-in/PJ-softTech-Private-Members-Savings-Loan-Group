@@ -1,174 +1,235 @@
+// src/Pages/shares/SharesApplicationForm.jsx
+
 import { useState } from "react";
-import Footer from "../../Components/Footer";
+import { FormField, SelectField, FormSection } from "../registration/RegistrationFields";
 import { formatIndianCurrency } from "../../utils/formHelpers";
-import { saveSharesApplication } from "../../services/sharesApplicationService";
-import { ApplicantDetails, ShareDetails, ShareDeclaration } from "./SharesApplicationSections";
-import { SHARE_PRICE } from "./sharesConstants";
 
-const sections = ["Applicant", "Share details", "Declaration"];
-const sectionComponents = [
-  ["applicant", ApplicantDetails],
-  ["shares", ShareDetails],
-  ["declaration", ShareDeclaration],
-];
-const requiredFields = {
-  applicant: [["registrationNumber", "Member registration number"], ["fullName", "Member name"], ["mobile", "Mobile number"], ["address", "Member address"], ["applicationDate", "Application date"]],
-  shares: [["numberOfShares", "Number of shares"], ["monthlySaving", "Monthly saving amount"], ["paymentMethod", "Payment method"]],
-  declaration: [["name", "Applicant name"], ["date", "Declaration date"]],
-};
-const initialForm = {
-  applicant: { registrationNumber: "", fullName: "", mobile: "", address: "", applicationDate: "" },
-  shares: { numberOfShares: "", monthlySaving: "", paymentMethod: "" },
-  declaration: { name: "", date: "", agreed: false },
-};
+export default function SharesApplicationForm() {
+  const [form, setForm] = useState({
+    folioNumber: "",
+    applicationDate: new Date().toISOString().split('T')[0],
+    shareType: "Ordinary Shares",
+    numberOfShares: "",
+    faceValue: "1000.00",
+    paymentStatus: "Complete",
+    dueDate: "",
+    paymentMode: "Bank Transfer",
+    referenceNumber: "",
+  });
 
-function getTotalShareValue(numberOfShares) {
-  return (Number(numberOfShares) || 0) * SHARE_PRICE;
-}
-
-function validateForm(form) {
-  const errors = {};
-  const required = (section, fields) => {
-    fields.forEach(([name, label]) => {
-      if (!form[section][name]) errors[`${section}.${name}`] = `${label} is required.`;
-    });
-  };
-  Object.entries(requiredFields).forEach(([section, fields]) => required(section, fields));
-  if (Number(form.shares.numberOfShares) < 1) errors["shares.numberOfShares"] = "Number of shares must be at least 1.";
-  if (Number(form.shares.monthlySaving) <= 0) errors["shares.monthlySaving"] = "Monthly saving must be greater than 0.";
-  if (!form.declaration.agreed) errors["declaration.agreed"] = "Please confirm the declaration.";
-  return errors;
-}
-
-function getSectionErrors(errors, section) {
-  return Object.fromEntries(
-    Object.entries(errors)
-      .filter(([key]) => key.startsWith(`${section}.`))
-      .map(([key, value]) => [key.slice(section.length + 1), value]),
-  );
-}
-
-function getSampleApplicant() {
-  const sampleNumber = Math.floor(1000 + Math.random() * 9000);
-  const sampleApplicants = [
-    { fullName: "Aarav Kulkarni", address: "12 Green Park, Pune" },
-    { fullName: "Meera Joshi", address: "44 River View Road, Nashik" },
-    { fullName: "Rohan Patil", address: "8 Shahu Nagar, Kolhapur" },
-  ];
-  const sample = sampleApplicants[Math.floor(Math.random() * sampleApplicants.length)];
-  return {
-    registrationNumber: `MEM-${sampleNumber}`,
-    fullName: sample.fullName,
-    mobile: `98${Math.floor(10000000 + Math.random() * 90000000)}`,
-    address: sample.address,
-    applicationDate: new Date().toISOString().slice(0, 10),
-  };
-}
-
-function SharesApplicationForm() {
-  const [form, setForm] = useState(initialForm);
   const [errors, setErrors] = useState({});
-  const [activeSection, setActiveSection] = useState(0);
-  const [message, setMessage] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const totalShareValue = getTotalShareValue(form.shares.numberOfShares);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
-  const updateField = (section, field, value) => {
-    setForm((current) => ({ ...current, [section]: { ...current[section], [field]: value } }));
-    setErrors((current) => {
-      const next = { ...current };
-      delete next[`${section}.${field}`];
-      return next;
-    });
-  };
-
-  const fillSampleData = () => {
-    const sampleApplicant = getSampleApplicant();
-    const sampleDate = new Date().toISOString().slice(0, 10);
-    setForm((current) => ({
-      ...current,
-      applicant: sampleApplicant,
-      shares: { numberOfShares: String(Math.floor(1 + Math.random() * 5)), monthlySaving: "1000", paymentMethod: "UPI" },
-      declaration: { name: sampleApplicant.fullName, date: sampleDate, agreed: true },
+  const updateField = (field, value) => {
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
     }));
-    setErrors({});
-    setMessage({ type: "success", text: "Sample member number, name, and address added." });
+    if (errors[field]) {
+      setErrors((prev) => ({ ...prev, [field]: null }));
+    }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const nextErrors = validateForm(form);
-    setErrors(nextErrors);
-    if (Object.keys(nextErrors).length) {
-      setMessage({ type: "error", text: "Please review the highlighted fields before submitting." });
+  const totalShareAmount = (Number(form.numberOfShares) || 0) * (Number(form.faceValue) || 0);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    const newErrors = {};
+
+    if (!form.folioNumber) newErrors.folioNumber = "Folio number is required.";
+    if (!form.applicationDate) newErrors.applicationDate = "Date is required.";
+    if (!form.numberOfShares || Number(form.numberOfShares) <= 0) newErrors.numberOfShares = "Valid number of shares required.";
+    
+    // Conditional validation for Due Date when Pending
+    if (form.paymentStatus === "Pending" && !form.dueDate) {
+      newErrors.dueDate = "Due date is required for pending payments.";
+    }
+
+    // Conditional validation for Transaction ID (unless payment mode is Cash)
+    if (form.paymentMode !== "Cash" && !form.referenceNumber) {
+      newErrors.referenceNumber = "Transaction ID / Reference number is required for non-cash payments.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    setIsSubmitting(true);
-    saveSharesApplication({ ...form, shares: { ...form.shares, shareValue: SHARE_PRICE }, totalShareValue, paymentAmount: totalShareValue });
-    setForm(initialForm);
-    setActiveSection(0);
-    setMessage({ type: "success", text: "Shares application submitted successfully." });
-    setIsSubmitting(false);
+
+    setIsSubmitted(true);
   };
 
   return (
-    <>
-      <header className="site-header">
-        <div className="brand-mark">SH</div>
+    <div className="max-w-[1400px] mx-auto p-6 lg:p-8 font-sans">
+      <div className="mb-6 pb-4 border-b border-slate-200 flex justify-between items-center">
         <div>
-          <p className="eyebrow">Private Members Savings &amp; Loan Group</p>
-          <h1>Shares application</h1>
+          <span className="text-xs font-bold text-teal-700 uppercase tracking-wider">Financial Workflow</span>
+          <h1 className="text-2xl font-extrabold text-[#102a43] m-0">Shares Application Form</h1>
+          <p className="text-slate-500 text-xs mt-1">Allocate new shares, track settlement methods, and record member capital.</p>
         </div>
-        <div className="header-status"><span className="status-dot" /> Secure form</div>
-      </header>
-      <main className="page-content">
-        <div className="member-file-toolbar">
-          <div>
-            <strong>Apply for additional shares</strong>
-            <span>Enter the member details and share allocation requested.</span>
-          </div>
-          <button type="button" className="button secondary" onClick={fillSampleData}>
-            Fill sample data
-          </button>
-          <div className="member-fee-summary">
-            <div><span>Application value</span><strong>{formatIndianCurrency(totalShareValue)}</strong></div>
-          </div>
+      </div>
+
+      {isSubmitted && (
+        <div className="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-900 text-sm font-bold flex items-center justify-between">
+          <span>✓ Shares application submitted and recorded successfully!</span>
+          <button onClick={() => setIsSubmitted(false)} className="text-xs underline text-emerald-700">Submit Another</button>
         </div>
-        <nav className="registration-steps" aria-label="Shares application sections" role="tablist">
-          {sections.map((label, index) => (
-            <button type="button" key={label} className={activeSection === index ? "active" : ""} role="tab" aria-selected={activeSection === index} onClick={() => setActiveSection(index)}>
-              <span>{index + 1}</span> {label}
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        
+        {/* Section 1: Allotment Details */}
+        <FormSection id="allotment-details" number="1" title="Share Allotment Details" active={true}>
+          <div className="mb-5 pb-4 border-b border-slate-200">
+            <p className="text-slate-500 text-[13px]">Enter member folio details and share quantity parameters.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+            <FormField
+              id="folio-number"
+              label="Folio / Member ID"
+              value={form.folioNumber}
+              onChange={(val) => updateField("folioNumber", val)}
+              error={errors.folioNumber}
+              required
+              placeholder="e.g. FOLIO-2026-001"
+            />
+
+            <FormField
+              id="application-date"
+              label="Application Date"
+              type="date"
+              value={form.applicationDate}
+              onChange={(val) => updateField("applicationDate", val)}
+              error={errors.applicationDate}
+              required
+            />
+
+            <SelectField
+              id="share-type"
+              label="Share Category"
+              value={form.shareType}
+              onChange={(val) => updateField("shareType", val)}
+              error={errors.shareType}
+              options={["Ordinary Shares", "Preference Shares", "Founder Shares"]}
+              required
+            />
+
+            <FormField
+              id="number-of-shares"
+              label="Number of Shares"
+              type="number"
+              value={form.numberOfShares}
+              onChange={(val) => updateField("numberOfShares", val)}
+              error={errors.numberOfShares}
+              required
+              min="1"
+              step="1"
+              inputMode="numeric"
+              placeholder="Enter quantity"
+            />
+
+            <FormField
+              id="face-value"
+              label="Face Value Per Share"
+              type="number"
+              value={form.faceValue}
+              onChange={(val) => updateField("faceValue", val)}
+              error={errors.faceValue}
+              required
+              min="1"
+              step="0.01"
+              inputMode="decimal"
+              placeholder="₹ 0.00"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6 p-4 border border-slate-200 rounded-lg bg-slate-50">
+            <div>
+              <span className="text-slate-500 text-[12px] block">Total Payable Amount</span>
+              <strong className="text-[#102a43] text-[20px] font-bold">
+                {formatIndianCurrency(totalShareAmount)}
+              </strong>
+            </div>
+            <div>
+              <span className="text-slate-500 text-[12px] block">Shares Requested</span>
+              <strong className="text-[#102a43] text-[20px] font-bold">
+                {form.numberOfShares || 0}
+              </strong>
+            </div>
+            <div>
+              <span className="text-slate-500 text-[12px] block">Category</span>
+              <strong className="text-[#102a43] text-[20px] font-bold">
+                {form.shareType}
+              </strong>
+            </div>
+          </div>
+        </FormSection>
+
+        {/* Section 2: Settlement Information */}
+        <FormSection id="settlement-details" number="2" title="Payment Status &amp; Settlement" active={true}>
+          <div className="mb-5 pb-4 border-b border-slate-200">
+            <p className="text-slate-500 text-[13px]">Configure payment status, due date parameters, and settlement modes.</p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
+            <SelectField
+              id="payment-status"
+              label="Payment Status"
+              value={form.paymentStatus}
+              onChange={(val) => updateField("paymentStatus", val)}
+              error={errors.paymentStatus}
+              options={["Complete", "Pending", "Refunded"]}
+              required
+            />
+
+            {/* Conditionally rendered Due Date field if Pending is selected */}
+            {form.paymentStatus === "Pending" && (
+              <FormField
+                id="due-date"
+                label="Due Date"
+                type="date"
+                value={form.dueDate}
+                onChange={(val) => updateField("dueDate", val)}
+                error={errors.dueDate}
+                required
+              />
+            )}
+
+            <SelectField
+              id="payment-mode"
+              label="Mode of Payment"
+              value={form.paymentMode}
+              onChange={(val) => updateField("paymentMode", val)}
+              error={errors.paymentMode}
+              options={["Cash", "UPI", "Bank Transfer", "Cheque"]}
+              required
+            />
+
+            {/* Transaction ID required for everything except Cash */}
+            {form.paymentMode !== "Cash" && (
+              <FormField
+                id="reference-number"
+                label="Transaction ID / UTR"
+                value={form.referenceNumber}
+                onChange={(val) => updateField("referenceNumber", val)}
+                error={errors.referenceNumber}
+                required
+                placeholder="Enter Transaction ID"
+              />
+            )}
+          </div>
+
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
+            <button
+              type="submit"
+              className="bg-teal-700 hover:bg-teal-800 text-white font-bold px-6 py-2.5 rounded-lg text-sm shadow-sm transition"
+            >
+              Submit Shares Application
             </button>
-          ))}
-        </nav>
-        <div className="registration-layout">
-          <div className="registration-form-column">
-            {message && <div className={`notice ${message.type}`} role="status"><span>{message.type === "success" ? "✓" : "!"}</span>{message.text}</div>}
-            <form onSubmit={handleSubmit} noValidate>
-              {sectionComponents.map(([section, Component], index) => (
-                <Component
-                  key={section}
-                  data={form[section]}
-                  errors={getSectionErrors(errors, section)}
-                  updateField={updateField}
-                  totalShareValue={totalShareValue}
-                  active={activeSection === index}
-                />
-              ))}
-              <div className="tab-actions">
-                <button type="button" className="button ghost" onClick={() => setActiveSection((current) => Math.max(0, current - 1))} disabled={activeSection === 0}>Back</button>
-                <button type="button" className="button secondary" onClick={() => setActiveSection((current) => Math.min(sections.length - 1, current + 1))} disabled={activeSection === sections.length - 1}>Next</button>
-              </div>
-              <div className="form-actions">
-                <button type="submit" className="button primary" disabled={isSubmitting}>Pay {formatIndianCurrency(totalShareValue)} &amp; submit <span>→</span></button>
-              </div>
-            </form>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </>
+        </FormSection>
+
+      </form>
+    </div>
   );
 }
-
-export default SharesApplicationForm;

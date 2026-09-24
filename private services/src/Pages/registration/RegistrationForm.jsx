@@ -1,6 +1,6 @@
+// src/Pages/registration/RegistrationForm.jsx
 import { useRef, useState } from "react";
 import { useMemberForm } from "../../hooks/useMemberForm";
-import Footer from "../../Components/Footer";
 import { getSectionErrors } from "../../utils/formHelpers";
 import {
   MemberDeclaration,
@@ -23,7 +23,11 @@ function RegistrationForm() {
     message,
     totalShareValue,
   } = useMemberForm();
+  
   const [activeSection, setActiveSection] = useState(0);
+  const formRef = useRef(null);
+
+  // The 6 steps mapping directly to your UI tabs
   const sections = [
     { id: "member-details", label: "Member details" },
     { id: "membership-details", label: "Membership" },
@@ -32,35 +36,11 @@ function RegistrationForm() {
     { id: "witness-details", label: "Witnesses" },
     { id: "payment-details", label: "Payment" },
   ];
-  const formRef = useRef(null);
-  const scrollToForm = () =>
-    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+
   return (
     <div className="registration-page">
-      <header className="site-header">
-        <div className="brand-mark">PM</div>
-        <div>
-          <p className="eyebrow">Private Members Savings &amp; Loan Group</p>
-          <h1>New member file</h1>
-        </div>
-        <div className="header-status">
-          <span className="status-dot" /> Secure form
-        </div>
-      </header>
       <main className="page-content">
-        <div className="member-file-toolbar">
-          <div>
-            <strong>Add a new member</strong>
-            <span>Enter details to create a complete member file.</span>
-          </div>
-          <button
-            type="button"
-            className="button primary"
-            onClick={scrollToForm}
-          >
-            + Add member
-          </button>
-        </div>
+        {/* Dynamic Multi-Step Navigation Tabs */}
         <nav className="registration-steps" aria-label="Registration sections" role="tablist">
           {sections.map((section, index) => (
             <button
@@ -76,14 +56,19 @@ function RegistrationForm() {
             </button>
           ))}
         </nav>
+
+        {/* Main Form Area */}
         <div className="registration-layout">
           <div className="registration-form-column">
+            
+            {/* Success/Error Notifications */}
             {message && (
-              <div className={`notice ${message.type}`} role="status">
-                <span>{message.type === "success" ? "✓" : "!"}</span>
+              <div className={`notice ${message.type} mb-4 p-4 border`} role="status">
+                <strong className="mr-2">{message.type === "success" ? "✓" : "!"}</strong>
                 {message.text}
               </div>
             )}
+
             <form
               ref={formRef}
               id="member-registration-form"
@@ -96,6 +81,7 @@ function RegistrationForm() {
                 updateField={updateField}
                 active={activeSection === 0}
               />
+              
               <MembershipDetails
                 data={form.membershipDetails}
                 errors={getSectionErrors(errors, "membershipDetails")}
@@ -103,18 +89,21 @@ function RegistrationForm() {
                 totalShareValue={totalShareValue}
                 active={activeSection === 1}
               />
+              
               <NomineeDetails
                 data={form.nomineeDetails}
                 errors={getSectionErrors(errors, "nomineeDetails")}
                 updateField={updateField}
                 active={activeSection === 2}
               />
+              
               <MemberDeclaration
                 data={form.declaration}
                 errors={getSectionErrors(errors, "declaration")}
                 updateField={updateField}
                 active={activeSection === 3}
               />
+              
               <WitnessDetails
                 form={form}
                 errors={{
@@ -124,12 +113,15 @@ function RegistrationForm() {
                 updateField={updateField}
                 active={activeSection === 4}
               />
+              
               <PaymentDetails
                 data={form.paymentDetails}
                 errors={getSectionErrors(errors, "paymentDetails")}
                 updateField={updateField}
                 active={activeSection === 5}
               />
+
+              {/* Bottom Tab Navigation Controls (Back / Next) */}
               <div className="tab-actions">
                 <button
                   type="button"
@@ -137,7 +129,7 @@ function RegistrationForm() {
                   onClick={() => setActiveSection((current) => Math.max(0, current - 1))}
                   disabled={activeSection === 0}
                 >
-                  Back
+                  ← Back
                 </button>
                 <button
                   type="button"
@@ -145,19 +137,21 @@ function RegistrationForm() {
                   onClick={() => setActiveSection((current) => Math.min(sections.length - 1, current + 1))}
                   disabled={activeSection === sections.length - 1}
                 >
-                  Next
+                  Next →
                 </button>
               </div>
-              <div className="form-actions">
+
+              {/* Final Submission & Save Controls */}
+              <div className="form-actions mt-6">
+                <button type="button" className="button ghost" onClick={resetForm}>
+                  Reset
+                </button>
                 <button
                   type="button"
                   className="button secondary"
                   onClick={saveDraft}
                 >
                   Save draft
-                </button>
-                <button type="button" className="button ghost" onClick={resetForm}>
-                  Reset
                 </button>
                 <button
                   type="submit"
@@ -177,7 +171,6 @@ function RegistrationForm() {
           </div>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }
