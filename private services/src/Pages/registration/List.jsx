@@ -1,3 +1,4 @@
+// src/Pages/registration/List.jsx
 import { useState } from "react";
 
 export default function List() {
@@ -12,7 +13,7 @@ export default function List() {
   const [filterUser, setFilterUser] = useState("All");
   const [filterMessageType, setFilterMessageType] = useState("All");
 
-  // Sample or API-driven member/transaction records with detailed loan and payment breakdowns
+  // Sample transaction/member records
   const [records] = useState([
     {
       id: 1,
@@ -76,7 +77,7 @@ export default function List() {
     },
   ]);
 
-  // Filter logic matching the filter options (Staff, Department, and Bill Type removed)
+  // Filter logic
   const filteredRecords = records.filter((item) => {
     if (filterType !== "All" && item.type !== filterType) return false;
     if (filterPaymentStatus !== "All" && item.paymentStatus !== filterPaymentStatus) return false;
@@ -172,6 +173,34 @@ export default function List() {
 
       </div>
 
+      {/* Reference-Style Summary Pill Badges positioned BELOW the filters */}
+      <div className="flex flex-wrap items-center gap-3 mb-6 overflow-x-auto pb-2">
+        <div className="bg-[#0284c7] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Total GST:</span>
+          <span>₹1,350</span>
+        </div>
+        <div className="bg-[#9333ea] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Total TDS:</span>
+          <span>₹0</span>
+        </div>
+        <div className="bg-[#22c55e] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Paid:</span>
+          <span>₹76,001</span>
+        </div>
+        <div className="bg-[#f97316] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Pending:</span>
+          <span>₹75,000</span>
+        </div>
+        <div className="bg-[#16a34a] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Expense Refund:</span>
+          <span>₹0</span>
+        </div>
+        <div className="bg-[#22c55e] text-white px-5 py-2.5 rounded-full text-xs font-extrabold shadow-sm flex items-center gap-2 whitespace-nowrap">
+          <span>Total Income:</span>
+          <span>₹76,001</span>
+        </div>
+      </div>
+
       {/* Main Data Table */}
       <div className="overflow-x-auto border border-slate-200 rounded-lg">
         <table className="w-full text-left border-collapse text-xs">
@@ -262,15 +291,15 @@ export default function List() {
             <div className="grid grid-cols-3 gap-3 mb-6">
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
                 <span className="text-slate-500 text-[11px] block font-semibold uppercase">Total Sanctioned</span>
-                <strong className="text-slate-900 text-base font-extrabold mt-1 block">{selectedMember.totalLoanAmount || "₹50,000"}</strong>
+                <strong className="text-slate-900 text-base font-extrabold mt-1 block">{selectedMember.totalLoanAmount}</strong>
               </div>
               <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-xl text-center">
                 <span className="text-emerald-800 text-[11px] block font-semibold uppercase">Amount Paid</span>
-                <strong className="text-emerald-700 text-base font-extrabold mt-1 block">{selectedMember.amountPaid || "₹35,000"}</strong>
+                <strong className="text-emerald-700 text-base font-extrabold mt-1 block">{selectedMember.amountPaid}</strong>
               </div>
               <div className="p-4 bg-rose-50 border border-rose-200 rounded-xl text-center">
                 <span className="text-rose-800 text-[11px] block font-semibold uppercase">Pending Due</span>
-                <strong className="text-rose-600 text-base font-extrabold mt-1 block">{selectedMember.pendingAmount || "₹15,000"}</strong>
+                <strong className="text-rose-600 text-base font-extrabold mt-1 block">{selectedMember.pendingAmount}</strong>
               </div>
             </div>
 
@@ -282,7 +311,7 @@ export default function List() {
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200/60">
                 <span className="text-slate-500">Due Date:</span>
-                <span className="font-bold text-amber-700">{selectedMember.dueDate || "-"}</span>
+                <span className="font-bold text-amber-700">{selectedMember.dueDate}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-slate-200/60">
                 <span className="text-slate-500">Payment Method:</span>

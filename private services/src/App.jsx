@@ -8,9 +8,11 @@ import RegistrationForm from "./Pages/registration/RegistrationForm";
 import RegistrationDashboard from "./Pages/registration/RegistrationDashboard";
 import SharesApplicationForm from "./Pages/shares/SharesApplicationForm";
 import SharesDashboard from "./Pages/shares/SharesDashboard";
+import SharesList from "./Pages/registration/SharesList";
 import List from "./Pages/registration/List";
 import MemberList from "./Components/MemberList";
 import AddMember from "./Components/AddMember";
+import LoanCalculator from "./Pages/loans/LoanCalculator";
 
 function App() {
   const [activeView, setActiveView] = useState("dashboard");
@@ -72,10 +74,13 @@ function App() {
             <div className="p-6 max-w-[1400px] mx-auto w-full flex-1">
               {sharesSlide === "dashboard" && <SharesDashboard onStartShares={() => setSharesSlide("form")} onShowList={() => setSharesSlide("list")} />}
               {sharesSlide === "form" && <SharesApplicationForm />}
-              {sharesSlide === "list" && <List />}
+              {sharesSlide === "list" && <SharesList />}
             </div>
           </div>
         )}
+
+        {/* Loan Calculator View */}
+        {activeView === "calculator" && <LoanCalculator />}
 
         {/* Other system routes */}
         {activeView === "members" && <MemberList />}
