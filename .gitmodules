@@ -1,6 +1,0 @@
-[submodule "frontend"]
-	path = frontend
-	url = https://github.com/Vivek29189/PJ-softTech-Private-Members-Savings-Loan-Group-frontend.git
-[submodule "backend"]
-	path = backend
-	url = https://github.com/Pjsofttech-in/savings-loan-backend.git
