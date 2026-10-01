@@ -17,8 +17,8 @@ export default function LoanCalculator() {
     if (principal <= 0 || monthlyRate <= 0 || months <= 0) return;
 
     // EMI formula: P * r * (1 + r)^n / ((1 + r)^n - 1)
-    const emi = 
-      (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) / 
+    const emi =
+      (principal * monthlyRate * Math.pow(1 + monthlyRate, months)) /
       (Math.pow(1 + monthlyRate, months) - 1);
 
     let balance = principal;
@@ -47,7 +47,7 @@ export default function LoanCalculator() {
 
   return (
     <div className="p-6 lg:p-8 max-w-[1400px] mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm font-sans">
-      
+
       {/* Header */}
       <div className="mb-6 pb-4 border-b border-slate-200">
         <span className="text-xs font-black text-teal-700 uppercase tracking-wider">Financial Tools</span>
@@ -56,11 +56,11 @@ export default function LoanCalculator() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        
+
         {/* Left Form Input Panel */}
         <div className="bg-slate-50 p-6 rounded-2xl border border-slate-200 space-y-4">
           <h3 className="text-sm font-black uppercase tracking-wider text-[#102a43]">Loan Parameters</h3>
-          
+
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">Loan Amount (₹)</label>
             <input

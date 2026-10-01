@@ -1,8 +1,10 @@
 // src/Pages/registration/List.jsx
 import { useState } from "react";
+import NotificationModal from "../../Components/NotificationModel";
 
 export default function List() {
   const [selectedMember, setSelectedMember] = useState(null);
+  const [showNotificationModal, setShowNotificationModal] = useState(false);
 
   // Filter states
   const [filterType, setFilterType] = useState("All");
@@ -323,7 +325,14 @@ export default function List() {
               </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-between items-center">
+              <button
+                onClick={() => setShowNotificationModal(true)}
+                className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer flex items-center gap-1.5"
+              >
+                💬 Send WhatsApp/SMS
+              </button>
+
               <button
                 onClick={() => setSelectedMember(null)}
                 className="bg-teal-700 hover:bg-teal-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-sm cursor-pointer"
@@ -334,6 +343,14 @@ export default function List() {
 
           </div>
         </div>
+      )}
+
+      {/* Notification Dispatch Modal */}
+      {showNotificationModal && selectedMember && (
+        <NotificationModal
+          record={selectedMember}
+          onClose={() => setShowNotificationModal(false)}
+        />
       )}
 
     </div>
