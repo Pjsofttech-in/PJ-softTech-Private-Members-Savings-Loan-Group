@@ -1,0 +1,3 @@
+[submodule "backend"]
+	path = backend
+	url = https://github.com/Pjsofttech-in/PJ-softTech-Private-Members-Savings-Loan-Group-Backend.git
